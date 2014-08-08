@@ -30,8 +30,6 @@ GPLv2
 use strict;
 use Munin::Plugin;
 
-my $cache = "/tmp/cpu_per_core.json";
-
 my( $cpu,
     $user,
     $nice,
