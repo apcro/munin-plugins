@@ -7,9 +7,10 @@ cpu_per_core - plugin to monitor CPU usage for each CPU core
 
 =head1 CONFIGURATION
 
+
 =head1 NOTES
 
-Modified for not use JSON
+modified to not require JSON
 
 =head1 AUTHOR
 
@@ -30,6 +31,8 @@ GPLv2
 use strict;
 use Munin::Plugin;
 
+my $cache = "/tmp/cpu_per_core.json";
+
 my( $cpu,
     $user,
     $nice,
@@ -44,10 +47,9 @@ my( $cpu,
 my @cpu;
 
 sub print_values {
-  
   print "multigraph cpu_per_core\n";
   open(INP,"<","/proc/stat") || die "Can not open /proc/stat/: $!\n";
-  while () {
+  while (<INP>) {
     next unless /^cpu(\d+)\s+(\d+)(\s+\d+)?(\s+\d+)?(\s+\d+)?(\s+\d+)?(\s+\d+)?(\s+\d+)?(\s+\d+)?(\s+\d+)?(\s+\d+)?\s+/;
     $cpu     = $1;
     $user    = $2;
@@ -73,7 +75,6 @@ sub print_values {
 	       guest   => $10 || 0,
 	       guest_nice => $11 || 0,
 	      });
-
     $user = $cpu[$cpu]->{user};
     $nice = $cpu[$cpu]->{nice};
     $system = $cpu[$cpu]->{system};
@@ -90,16 +91,16 @@ sub print_values {
   }
 
   foreach my $cpu (sort {$a->{cpu}<=>$b->{cpu}} @cpu) {
-    $user       = $cpu->{user};
-    $nice       = $cpu->{nice};
-    $system     = $cpu->{system};
-    $idle       = $cpu->{idle};
-    $iowait     = $cpu->{iowait};
-    $irq        = $cpu->{irq};
-    $softirq    = $cpu->{softirq};
-    $steal      = $cpu->{steal};
-    $guest      = $cpu->{guest};
-    $guest_nice = $cpu->{guest_nice};
+  	$user       = $cpu->{user};
+  	$nice       = $cpu->{nice};
+  	$system     = $cpu->{system};
+  	$idle       = $cpu->{idle};
+  	$iowait     = $cpu->{iowait};
+  	$irq        = $cpu->{irq};
+  	$softirq    = $cpu->{softirq};
+  	$steal      = $cpu->{steal};
+  	$guest      = $cpu->{guest};
+  	$guest_nice = $cpu->{guest_nice};
     my $total = $user + $nice + $system + $idle + $iowait + $irq +
       $softirq + $steal + $guest + $guest_nice;
 
@@ -148,7 +149,7 @@ if ( $ARGV[0] eq "config" ) {
   print "graph_vlabel %\n";
 
     open(INP,"<","/proc/stat") || die "Can not open /proc/stat/: $!\n";
-  while () {
+  while (<INP>) {
     next unless /^cpu(\d+)\s+(\d+)(\s+\d+)?(\s+\d+)?(\s+\d+)?(\s+\d+)?(\s+\d+)?(\s+\d+)?(\s+\d+)?(\s+\d+)?(\s+\d+)?\s+/;
     $cpu     = $1;
     $user    = $2;
