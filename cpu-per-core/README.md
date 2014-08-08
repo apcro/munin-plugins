@@ -12,7 +12,7 @@ Testing
 To make sure the plugin works, run 
 
 ```bash
-munin-run --servicedir $PWD cpu-per-core
+munin-run cpu-per-core
 ```
 
 This should generate an initial of data.
