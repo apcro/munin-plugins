@@ -11,6 +11,8 @@ Testing
 -------
 To make sure the plugin works, run 
 
-`munin-run --servicedir $PWD cpu-per-core`
+```bash
+munin-run --servicedir $PWD cpu-per-core
+```
 
 This should generate an initial of data.
