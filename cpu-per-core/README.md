@@ -15,4 +15,13 @@ To make sure the plugin works, run
 munin-run cpu-per-core
 ```
 
-This should generate an initial set of data.
+If all goes well, this will display a complete set of data.
+
+Configuration Test
+------------------
+Run
+
+```bash
+munin-run cpu-per-core config
+```
+to see the Munin configuration data.
