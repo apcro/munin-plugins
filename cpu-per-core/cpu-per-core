@@ -1,5 +1,4 @@
 #!/usr/bin/perl -w
-# -*- cperl -*-
 
 =head1 NAME
 
@@ -7,15 +6,15 @@ cpu_per_core - plugin to monitor CPU usage for each CPU core
 
 =head1 CONFIGURATION
 
-
 =head1 NOTES
 
-modified to not require JSON
+modified to not use Storable instead of JSON
 
 =head1 AUTHOR
 
 Matija Grabnar
 Tom Gordon
+Di Warachat
 
 =head1 LICENSE
 
@@ -48,11 +47,11 @@ my( $cpu,
 my @cpu;
 
 sub print_values {
-  my ($json,$str);
-
-  my ($json,$str);
-  $cache_ref = retrieve($cache);
-  print "No cache, get fresh stuff!\n" unless defined $cache_ref;
+  my ($cache_ref,$str);
+  if (-e $cache) {
+    $cache_ref = retrieve($cache);
+    print "No cache, get fresh stuff!\n" unless defined $cache_ref;
+  }
 
   print "multigraph cpu_per_core\n";
   open(INP,"<","/proc/stat") || die "Can not open /proc/stat/: $!\n";
