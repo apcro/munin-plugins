@@ -4,4 +4,4 @@ CPU-per-core
 Without JSON
 ------------
 
-This is a modification of the original Munin plugin `CPU-per-core` written by Matija Grabnar to operate without needing JSON (or caching to disk)
+This is a modification of the original Munin plugin `CPU-per-core` written by [Matija Grabnar](http://www.matija.si/system-administration/2014/04/01/a-munin-plugin-to-monitor-each-cpu-core-separately/) to operate without needing JSON (or caching to disk)
