@@ -31,7 +31,7 @@ GPLv2
 use strict;
 use Munin::Plugin;
 
-my $cache = "/tmp/cpu_per_core.json";
+my $cache = "/tmp/cpu_per_core.csv";
 
 my( $cpu,
     $user,
@@ -47,6 +47,14 @@ my( $cpu,
 my @cpu;
 
 sub print_values {
+
+  my ($csv);
+  if (open(CACHE,"<","$cache")) {
+    chomp($line);
+    my @csv = split ",", $line;
+  }
+
+
   print "multigraph cpu_per_core\n";
   open(INP,"<","/proc/stat") || die "Can not open /proc/stat/: $!\n";
   while (<INP>) {
@@ -75,32 +83,62 @@ sub print_values {
 	       guest   => $10 || 0,
 	       guest_nice => $11 || 0,
 	      });
-    $user = $cpu[$cpu]->{user};
-    $nice = $cpu[$cpu]->{nice};
-    $system = $cpu[$cpu]->{system};
-    $idle = $cpu[$cpu]->{idle};
-    $iowait = $cpu[$cpu]->{iowait};
-    $irq = $cpu[$cpu]->{irq};
-    $softirq = $cpu[$cpu]->{softirq};
-    $steal = $cpu[$cpu]->{steal};
-    $guest = $cpu[$cpu]->{guest};
-    $guest_nice = $cpu[$cpu]->{guest_nice};
+    
+    if (defined($csv->[$cpu])) {
+      $user =    $cpu[$cpu]->{user}    - $csv->[$cpu]->{user};
+      $nice =    $cpu[$cpu]->{nice}    - $csv->[$cpu]->{nice};
+      $system =  $cpu[$cpu]->{system}  - $csv->[$cpu]->{system};
+      $idle =    $cpu[$cpu]->{idle}    - $csv->[$cpu]->{idle};
+      $iowait =  $cpu[$cpu]->{iowait}  - $csv->[$cpu]->{iowait};
+      $irq =     $cpu[$cpu]->{irq}     - $csv->[$cpu]->{irq};
+      $softirq = $cpu[$cpu]->{softirq} - $json->[$cpu]->{softirq};
+      $steal =   $cpu[$cpu]->{steal}   - $csv->[$cpu]->{steal};
+      $guest =   $cpu[$cpu]->{guest}   - $csv->[$cpu]->{guest};
+      $guest_nice = $cpu[$cpu]->{guest_nice} - $csv->[$cpu]->{guest_nice};
+    } else {
+      $user = $cpu[$cpu]->{user};
+      $nice = $cpu[$cpu]->{nice};
+      $system = $cpu[$cpu]->{system};
+      $idle = $cpu[$cpu]->{idle};
+      $iowait = $cpu[$cpu]->{iowait};
+      $irq = $cpu[$cpu]->{irq};
+      $softirq = $cpu[$cpu]->{softirq};
+      $steal = $cpu[$cpu]->{steal};
+      $guest = $cpu[$cpu]->{guest};
+      $guest_nice = $cpu[$cpu]->{guest_nice};
+    }
+    
     my $usage = int(100-100*($idle/($user+$nice+$system+$idle+$iowait+
 				    $irq+$softirq+$steal+$guest+$guest_nice)));
     print sprintf "cpu%d_usage.value %d\n",$cpu,$usage;
   }
 
   foreach my $cpu (sort {$a->{cpu}<=>$b->{cpu}} @cpu) {
-  	$user       = $cpu->{user};
-  	$nice       = $cpu->{nice};
-  	$system     = $cpu->{system};
-  	$idle       = $cpu->{idle};
-  	$iowait     = $cpu->{iowait};
-  	$irq        = $cpu->{irq};
-  	$softirq    = $cpu->{softirq};
-  	$steal      = $cpu->{steal};
-  	$guest      = $cpu->{guest};
-  	$guest_nice = $cpu->{guest_nice};
+  
+    if (defined($csv->[$cpu->{cpu}])) {
+      $user =    $cpu->{user}    - $csv->[$cpu->{cpu}]->{user};
+      $nice =    $cpu->{nice}    - $csv->[$cpu->{cpu}]->{nice};
+      $system =  $cpu->{system}  - $csv->[$cpu->{cpu}]->{system};
+      $idle =    $cpu->{idle}    - $csv->[$cpu->{cpu}]->{idle};
+      $iowait =  $cpu->{iowait}  - $csv->[$cpu->{cpu}]->{iowait};
+      $irq =     $cpu->{irq}     - $csv->[$cpu->{cpu}]->{irq};
+      $softirq = $cpu->{softirq} - $csv->[$cpu->{cpu}]->{softirq};
+      $steal =   $cpu->{steal}   - $csv->[$cpu->{cpu}]->{steal};
+      $guest =   $cpu->{guest}   - $csv->[$cpu->{cpu}]->{guest};
+      $guest_nice = $cpu->{guest_nice} - $csv->[$cpu->{cpu}]->{guest_nice};
+    } else {
+      $user       = $cpu->{user};
+      $nice       = $cpu->{nice};
+      $system     = $cpu->{system};
+      $idle       = $cpu->{idle};
+      $iowait     = $cpu->{iowait};
+      $irq        = $cpu->{irq};
+      $softirq    = $cpu->{softirq};
+      $steal      = $cpu->{steal};
+      $guest      = $cpu->{guest};
+      $guest_nice = $cpu->{guest_nice};
+    }
+
     my $total = $user + $nice + $system + $idle + $iowait + $irq +
       $softirq + $steal + $guest + $guest_nice;
 
@@ -120,6 +158,10 @@ sub print_values {
        * $factor;
   }
 
+  my $str = join ",", \@cpu;
+  open(CACHE,">",$cache) || die "Can not write to cache file $cache : $!\n";
+  print CACHE $str;
+  close(CACHE);
 }
 
 need_multigraph();
