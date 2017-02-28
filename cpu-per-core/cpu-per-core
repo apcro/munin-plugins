@@ -222,7 +222,7 @@ if ( $ARGV[0] eq "config" ) {
     print "graph_scale no\n";
     print "graph_args --upper-limit 100 --lower-limit 0 --rigid\n";
     print "graph_vlabel %\n";
-    print "graph_category mandarina\n";
+    print "graph_category system\n";
 
     print sprintf "cpu%d_system.label system\n",$cpu->{cpu};    
     print sprintf "cpu%d_system.draw AREA\n",$cpu->{cpu};
